@@ -1,14 +1,17 @@
+import useStore from "../store/store";
+
 import { formatTimestamp } from "../utils/dateUtils";
 
-export default function OnBoardComponent({ listOnBoard, listEmployee }) {
+export default function OnBoardComponent() {
+  const { onBoard, employees } = useStore();
+
   const getNameEmployee = (employeeId) => {
-    let employeData = listEmployee.find((item) => item.id == employeeId);
+    let employeData = employees.find((item) => item.id == employeeId);
     // Get checkIn
-    let checkIn = listOnBoard.find((item) => item.id == employeeId);
+    let checkIn = onBoard.find((item) => item.id == employeeId);
     let checkInDate = formatTimestamp(checkIn.timestamp);
 
     return [employeData.name, checkInDate];
-    //return employeData.name;
   };
   return (
     <>
@@ -22,7 +25,7 @@ export default function OnBoardComponent({ listOnBoard, listEmployee }) {
             </tr>
           </thead>
           <tbody>
-            {listOnBoard.map((employee) => (
+            {onBoard.map((employee) => (
               <tr key={employee.id}>
                 <th scope="row">{getNameEmployee(employee.id)[0]}</th>
                 <td>{getNameEmployee(employee.id)[1]}</td>

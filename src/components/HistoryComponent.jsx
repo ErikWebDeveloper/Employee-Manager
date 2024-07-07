@@ -1,12 +1,14 @@
+import useStore from "../store/store";
 import { formatTimestamp } from "../utils/dateUtils";
 
-export default function HistoryComponent({ listHistory, listEmployee }) {
+export default function HistoryComponent() {
+  const { history, employees } = useStore();
   const getHistoriData = (employeeId, index) => {
     // Get name
-    let employeData = listEmployee.find((item) => item.id == employeeId);
+    let employeData = employees.find((item) => item.id == employeeId);
     // Get checkIns/CheckOuts
-    let checkIn = listHistory[index].in.timestamp;
-    let checkOut = listHistory[index].out.timestamp;
+    let checkIn = history[index].in.timestamp;
+    let checkOut = history[index].out.timestamp;
 
     let checkInDate = formatTimestamp(checkIn);
     let checkOutDate = formatTimestamp(checkOut);
@@ -27,7 +29,7 @@ export default function HistoryComponent({ listHistory, listEmployee }) {
             </tr>
           </thead>
           <tbody>
-            {listHistory.map((employee, index) => (
+            {history.map((employee, index) => (
               <tr key={`${employee.in.id}-history-${index}`}>
                 <th scope="row">{getHistoriData(employee.in.id, index)[0]}</th>
                 <td>{getHistoriData(employee.in.id, index)[1]}</td>

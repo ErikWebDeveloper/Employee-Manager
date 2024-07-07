@@ -1,29 +1,14 @@
-import { useState, useEffect } from "react";
-import service from "../services/Service";
-
 import SignUpForm from "../components/SignUpForm";
+
+import useStore from "../store/store";
 
 export default function SignUpPage() {
   // 🗽 States
-  const [employees, setEmployees] = useState([]);
+  const { employees, putOnBoard, deleteOnBoard } = useStore();
 
   // ⚙️ Consts
   const formId = "signUpEmployeeForm";
   const dataOptions = ["id", "employeeAction"];
-
-  //🌐 Get initial data
-  useEffect(() => {
-    const fetchEmployee = async () => {
-      try {
-        let employees = await service.getEmployees();
-        setEmployees(employees);
-      } catch (error) {
-        console.error("Error fetching employee:", error);
-      }
-    };
-
-    fetchEmployee();
-  }, []);
 
   // 🧩 Functions
   const handleSubmit = async (event) => {
@@ -42,10 +27,10 @@ export default function SignUpPage() {
     if (data.employeeAction === "in" || data.employeeAction === "out") {
       switch (data.employeeAction) {
         case "in":
-          await service.putOnBoard(data);
+          await putOnBoard(data);
           break;
         case "out":
-          await service.deleteOnBoard(data);
+          await deleteOnBoard(data);
           break;
       }
       resetForm();
