@@ -85,6 +85,8 @@ export default function SignUpPage() {
       field.classList.add("is-invalid");
     }
   };
+
+  // 🎥 Render
   return (
     <SignUpForm
       handleSubmit={handleSubmit}
