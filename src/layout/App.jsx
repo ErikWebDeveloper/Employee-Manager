@@ -1,53 +1,25 @@
 import React, { useState, useEffect } from "react";
-import service from "./services/Service";
+import Employees from "./assets/placeholders/employees.json";
+
 import { formatTimestamp } from "./utils/dateUtils";
 
 export default function App() {
   // 🗽 States
-  const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState(Employees);
   const [onBoard, setOnBoard] = useState([]);
   const [history, setHistory] = useState([]);
-
-  //🌐 Get initial data
-  useEffect(() => {
-    const fetchEmployee = async () => {
-      try {
-        let employees = await service.getEmployees();
-        setEmployees(employees);
-      } catch (error) {
-        console.error("Error fetching employee:", error);
-      }
-    };
-
-    const fetchOnBoard = async () => {
-      try {
-        let onBoard = await service.getOnBoard();
-        setOnBoard(onBoard);
-      } catch (error) {
-        console.error("Error fetching onboard:", error);
-      }
-    };
-
-    const fetchHistory = async () => {
-      try {
-        let history = await service.getHistory();
-        setHistory(history);
-      } catch (error) {
-        console.error("Error fetching history:", error);
-      }
-    };
-
-    fetchEmployee();
-    fetchOnBoard();
-    fetchHistory();
-  }, []);
 
   // ⚙️ Consts
   const formId = "signUpEmployeeForm";
   const dataOptions = ["id", "employeeAction"];
 
+  // 🌐 Data Fetchs
+  useEffect(() => {
+    
+  }, []);
+
   // 🧩 Functions
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     // Get data from form
     let data = getFormData(formId);
@@ -65,17 +37,26 @@ export default function App() {
     if (data.employeeAction === "in" || data.employeeAction === "out") {
       switch (data.employeeAction) {
         case "in":
-          let updatedPutOnBoard = await service.putOnBoard(data);
-          setOnBoard(updatedPutOnBoard);
+          if (!onBoard.find((item) => item.id === data.id)) {
+            setOnBoard([...onBoard, { ...data, timestamp }]);
+            resetForm();
+          }
           break;
         case "out":
-          let [board, history] = await service.deleteOnBoard(data);
-          setOnBoard(board);
-          setHistory(history);
+          let employeeOffBoard = onBoard.find((item) => item.id === data.id);
+          if (employeeOffBoard) {
+            let updateBoard = onBoard.filter((item) => item.id !== data.id);
+            setOnBoard(updateBoard);
+            setHistory([
+              ...history,
+              { in: employeeOffBoard, out: { ...data, timestamp } },
+            ]);
+            resetForm();
+          }
           break;
       }
-      resetForm();
     }
+    //return console.log({ ...data, timestamp });
   };
 
   // 📚 Libs
@@ -83,6 +64,13 @@ export default function App() {
     for (const index in errors) {
       let field = document.querySelector(`[name="${errors[index]}"]`);
       field.classList.add("is-invalid");
+    }
+  };
+
+  const restartErrors = (fields) => {
+    for (const index in fields) {
+      let field = document.querySelector(`[name="${fields[index]}"]`);
+      field.classList.remove("is-invalid");
     }
   };
 
@@ -113,38 +101,10 @@ export default function App() {
     return data;
   };
 
+  const serializeData = () => {};
 
   return (
     <main className="p-3">
-      <SignUpForm
-        handleSubmit={handleSubmit}
-        dataOptions={dataOptions}
-        employees={employees}
-      />
-      <OnBoardComponent
-        listOnBoard={onBoard}
-        listEmployee={employees}
-      />
-      <HistoryComponent listEmployee={employees} listHistory={history} />
-    </main>
-  );
-}
-
-const SignUpForm = ({
-  handleSubmit,
-  dataOptions,
-  employees,
-}) => {
-
-  const restartErrors = (fields) => {
-    for (const index in fields) {
-      let field = document.querySelector(`[name="${fields[index]}"]`);
-      field.classList.remove("is-invalid");
-    }
-  };
-
-  return (
-    <>
       <h1>Sign Up Employe</h1>
       <form
         onSubmit={handleSubmit}
@@ -206,9 +166,12 @@ const SignUpForm = ({
           </button>
         </div>
       </form>
-    </>
+
+      <OnBoardComponent listOnBoard={onBoard} listEmployee={employees} />
+      <HistoryComponent listEmployee={employees} listHistory={history} />
+    </main>
   );
-};
+}
 
 const OnBoardComponent = ({ listOnBoard, listEmployee }) => {
   const getNameEmployee = (employeeId) => {
